@@ -1,0 +1,61 @@
+# ============================================================================
+# Alert rules — Horizon Hotel HMS
+# These fire against metrics scraped from nginx-prometheus-exporter and
+# Prometheus' own self-monitoring. Extend with app-specific metrics if you
+# add a /metrics endpoint to a backend service (e.g. Cloud Functions) later.
+# ============================================================================
+groups:
+  - name: horizon-hotel-availability
+    rules:
+      - alert: AppTargetDown
+        expr: up{job="nginx"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Horizon Hotel app is unreachable"
+          description: "Prometheus has not been able to scrape the app's Nginx exporter for over 1 minute. The site may be down."
+
+      - alert: PrometheusTargetMissing
+        expr: up == 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "A Prometheus scrape target is down"
+          description: "Target {{ $labels.job }} has been down for more than 5 minutes."
+
+  - name: horizon-hotel-traffic
+    rules:
+      - alert: HighNginx5xxRate
+        expr: |
+          sum(rate(nginx_http_requests_total{status=~"5.."}[5m]))
+          /
+          sum(rate(nginx_http_requests_total[5m]))
+          > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Elevated 5xx error rate on Horizon Hotel app"
+          description: "More than 5% of requests have returned a 5xx status over the last 5 minutes. Check application and Nginx logs."
+
+      - alert: NoTrafficReceived
+        expr: sum(rate(nginx_http_requests_total[15m])) == 0
+        for: 15m
+        labels:
+          severity: info
+        annotations:
+          summary: "No traffic received by Horizon Hotel app"
+          description: "The app has received zero requests in the last 15 minutes. This may be expected during off-hours, or may indicate a routing/DNS problem."
+
+  - name: horizon-hotel-resource
+    rules:
+      - alert: PrometheusConfigReloadFailed
+        expr: prometheus_config_last_reload_successful == 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Prometheus configuration reload failed"
+          description: "The last reload of the Prometheus configuration file failed. Alerting and scraping may be running on stale config."

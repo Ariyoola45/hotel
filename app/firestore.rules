@@ -1,0 +1,69 @@
+rules_version = '2';
+
+// ============================================================================
+// Firestore Security Rules — Horizon Hotel Hospitality Management System
+// ----------------------------------------------------------------------------
+// Roles are read from the users/{uid} document's `role` field ("admin" or
+// "receptionist"). Both roles can operate the day-to-day front-desk
+// workflow (guests, rooms, reservations, payments, housekeeping); only
+// admins can manage room inventory deletion, staff role assignment, and
+// view aggregate reports data beyond what receptionists already see.
+// ============================================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function userRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && userRole() == 'admin';
+    }
+
+    function isStaff() {
+      return isSignedIn() && (userRole() == 'admin' || userRole() == 'receptionist');
+    }
+
+    // ---- users (staff profiles / role assignment) ----
+    match /users/{uid} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // ---- guests ----
+    match /guests/{guestId} {
+      allow read, create, update: if isStaff();
+      allow delete: if isAdmin();
+    }
+
+    // ---- rooms ----
+    match /rooms/{roomId} {
+      allow read: if isStaff();
+      allow update: if isStaff(); // status changes happen from both roles
+      allow create, delete: if isAdmin();
+    }
+
+    // ---- reservations ----
+    match /reservations/{reservationId} {
+      allow read, create, update: if isStaff();
+      allow delete: if isAdmin();
+    }
+
+    // ---- payments ----
+    match /payments/{paymentId} {
+      allow read, create: if isStaff();
+      allow update, delete: if isAdmin();
+    }
+
+    // ---- housekeeping tasks ----
+    match /housekeepingTasks/{taskId} {
+      allow read, create, update: if isStaff();
+      allow delete: if isAdmin();
+    }
+  }
+}

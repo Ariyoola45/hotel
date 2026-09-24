@@ -1,0 +1,110 @@
+version: "3.9"
+
+# ============================================================================
+# Horizon Hotel — Hospitality Management System
+# Full local stack: the React/Nginx app, an Nginx metrics exporter, and a
+# Prometheus + Alertmanager + Grafana monitoring stack.
+#
+# Usage:
+#   docker compose up -d --build
+#   App:        http://localhost:8080
+#   Prometheus: http://localhost:9090
+#   Alertmanager: http://localhost:9093
+#   Grafana:    http://localhost:3000  (default admin/admin — change on first login)
+# ============================================================================
+
+services:
+  app:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+      args:
+        VITE_FIREBASE_API_KEY: ${VITE_FIREBASE_API_KEY:-}
+        VITE_FIREBASE_AUTH_DOMAIN: ${VITE_FIREBASE_AUTH_DOMAIN:-}
+        VITE_FIREBASE_PROJECT_ID: ${VITE_FIREBASE_PROJECT_ID:-}
+        VITE_FIREBASE_STORAGE_BUCKET: ${VITE_FIREBASE_STORAGE_BUCKET:-}
+        VITE_FIREBASE_MESSAGING_SENDER_ID: ${VITE_FIREBASE_MESSAGING_SENDER_ID:-}
+        VITE_FIREBASE_APP_ID: ${VITE_FIREBASE_APP_ID:-}
+    image: horizon-hotel-app:latest
+    container_name: hh-app
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    networks:
+      - hh-net
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:80/healthz"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+  nginx-exporter:
+    image: nginx/nginx-prometheus-exporter:1.3.0
+    container_name: hh-nginx-exporter
+    restart: unless-stopped
+    command:
+      - "--nginx.scrape-uri=http://app:80/stub_status"
+    ports:
+      - "9113:9113"
+    depends_on:
+      - app
+    networks:
+      - hh-net
+
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    container_name: hh-prometheus
+    restart: unless-stopped
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/prometheus/alert.rules.yml:/etc/prometheus/alert.rules.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.enable-lifecycle"
+    ports:
+      - "9090:9090"
+    depends_on:
+      - app
+      - nginx-exporter
+    networks:
+      - hh-net
+
+  alertmanager:
+    image: prom/alertmanager:v0.27.0
+    container_name: hh-alertmanager
+    restart: unless-stopped
+    volumes:
+      - ./monitoring/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+    ports:
+      - "9093:9093"
+    networks:
+      - hh-net
+
+  grafana:
+    image: grafana/grafana:11.2.0
+    container_name: hh-grafana
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - hh-net
+
+networks:
+  hh-net:
+    driver: bridge
+
+volumes:
+  prometheus-data:
+  grafana-data:
