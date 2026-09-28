@@ -11,7 +11,7 @@ WORKDIR /app
 
 # Install dependencies first (better layer caching on rebuilds)
 COPY package*.json ./
-RUN npm install --silent
+RUN npm ci --silent
 
 # Copy source and build
 COPY . .
