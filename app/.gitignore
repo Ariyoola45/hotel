@@ -1,50 +1,101 @@
-# Dependencies
+# ---- Dependencies ----
 node_modules/
+.pnp/
+.pnp.js
 
-# Build
+# ---- Build output ----
 dist/
 build/
+dist-ssr/
+*.local
 
-# Environment variables
+# ---- Environment variables ----
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 
-# Logs
+# ---- Logs ----
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+logs/
 
-# OS files
+# ---- OS files ----
 .DS_Store
 Thumbs.db
+desktop.ini
 
-# IDE
+# ---- Editor / IDE ----
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
 
-# Terraform
+# ---- Terraform ----
 .terraform/
+.terraform.lock.hcl
 *.tfstate
 *.tfstate.*
 *.tfvars
 *.tfvars.json
+crash.log
+crash.*.log
 
-# Docker
+# ---- Ansible ----
+*.retry
+
+# ---- Docker ----
 *.tar
+docker-compose.override.yml
 
-# Python
+# ---- Kubernetes ----
+kubeconfig
+*.kubeconfig
+
+# ---- Firebase / GCP ----
+.firebase/
+firebase-debug.log
+firebase-debug.*.log
+*serviceAccountKey*.json
+firebase-adminsdk-*.json
+.runtimeconfig.json
+
+# ---- AWS / cloud credentials ----
+.aws/
+*.pem
+*.key
+id_rsa*
+
+# ---- Python (if any tooling/scripts use it) ----
 __pycache__/
 *.py[cod]
 .venv/
 venv/
 
-# Coverage
+# ---- Test coverage ----
 coverage/
+*.lcov
 
-# Firebase
-.firebase/
-firebase-debug.log
+# ---- npm/yarn cache ----
+.npm/
+.yarn/
+.pnpm-store/
+
+# ---- Misc backups ----
+*.bak
+
+# ---- Project-specific junk (things that have leaked in before) ----
+ERROR
+[build
+.agents/
+skills-lock.json
+.vercel
+.env*
+
+.vercel
+

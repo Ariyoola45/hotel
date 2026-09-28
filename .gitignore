@@ -1,0 +1,6 @@
+.agents/
+skills-lock.json
+ERROR
+[build
+.vercel
+.env*
