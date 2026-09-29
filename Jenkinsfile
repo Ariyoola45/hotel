@@ -1,5 +1,9 @@
 pipeline {
   agent any
+   
+  tools {
+    nodejs 'node20'   // must match the name you gave it in step 2
+  }
 
   environment {
     IMAGE_NAME = "react-app"
