@@ -67,7 +67,7 @@ pipeline {
       parallel {
         stage('Kubernetes') {
           steps {
-            sh 'kubectl set image deployment/react-app react-app=$IMAGE_NAME:$IMAGE_TAG'
+           sh 'kubectl set image deployment/horizon-hotel-management-system react-app=$IMAGE_NAME:$IMAGE_TAG'
           }
         }
         stage('Firebase Hosting') {
