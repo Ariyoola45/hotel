@@ -28,7 +28,7 @@ pipeline {
       steps {
         dir('app') {
           withSonarQubeEnv('MySonarQube') {
-            sh 'sonar-scanner'
+            sh "${tool 'sonar-scanner'}/bin/sonar-scanner"
           }
         }
       }
@@ -64,8 +64,8 @@ pipeline {
         stage('Firebase Hosting') {
           steps {
             dir('app') {
-              withCredentials([string(credentialsId: 'firebase-token', variable: 'FIREBASE_TOKEN')]) {
-                sh 'firebase deploy --only hosting --token "$FIREBASE_TOKEN"'
+              withCredentials([string(credentialsId: 'firebase-token', variable: 'TOKEN-FIREBASES')]) {
+                sh 'firebase deploy --only hosting --token "$TOKEN-FIREBASES"'
               }
             }
           }
