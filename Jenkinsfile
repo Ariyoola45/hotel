@@ -10,10 +10,18 @@ pipeline {
     IMAGE_TAG  = "v${BUILD_NUMBER}"
   }
 
-  stages {
-    stage('Checkout') {
-      steps { checkout scm }
-    }
+stage('Checkout') {
+  steps {
+    checkout([
+      $class: 'GitSCM',
+      branches: [[name: '*/main']],
+      extensions: [
+        [$class: 'CloneOption', shallow: true, depth: 1, timeout: 30]
+      ],
+      userRemoteConfigs: [[url: 'https://github.com/Ariyoola45/hotel']]
+    ])
+  }
+}
 
     stage('Install & Build') {
       steps {
