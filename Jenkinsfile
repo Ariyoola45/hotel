@@ -1,6 +1,6 @@
 pipeline {
   agent any
-   
+
   tools {
     nodejs 'node20'   // must match the name you gave it in step 2
   }
@@ -10,18 +10,19 @@ pipeline {
     IMAGE_TAG  = "v${BUILD_NUMBER}"
   }
 
-stage('Checkout') {
-  steps {
-    checkout([
-      $class: 'GitSCM',
-      branches: [[name: '*/main']],
-      extensions: [
-        [$class: 'CloneOption', shallow: true, depth: 1, timeout: 30]
-      ],
-      userRemoteConfigs: [[url: 'https://github.com/Ariyoola45/hotel']]
-    ])
-  }
-}
+  stages {
+    stage('Checkout') {
+      steps {
+        checkout([
+          $class: 'GitSCM',
+          branches: [[name: '*/main']],
+          extensions: [
+            [$class: 'CloneOption', shallow: true, depth: 1, timeout: 30]
+          ],
+          userRemoteConfigs: [[url: 'https://github.com/Ariyoola45/hotel']]
+        ])
+      }
+    }
 
     stage('Install & Build') {
       steps {
@@ -81,8 +82,8 @@ stage('Checkout') {
         stage('Vercel') {
           steps {
             dir('app') {
-              withCredentials([string(credentialsId: 'vercel-token', variable: 'VERCEL_TOKEN')]) {
-                sh 'vercel --token "$VERCEL_TOKEN" --prod --yes'
+              withCredentials([string(credentialsId: 'vercel-token', variable: 'VERCEL-TOKEN')]) {
+                sh 'vercel --token "$VERCEL-TOKEN" --prod --yes'
               }
             }
           }
