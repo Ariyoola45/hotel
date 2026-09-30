@@ -2,7 +2,7 @@ pipeline {
   agent any
 
   tools {
-    nodejs 'node20'   // must match the name you gave it in step 2
+    nodejs 'node20'
   }
 
   environment {
@@ -11,6 +11,7 @@ pipeline {
   }
 
   stages {
+
     stage('Checkout') {
       steps {
         checkout([
@@ -60,29 +61,49 @@ pipeline {
     }
 
     stage('Load into Minikube') {
-      steps { sh 'minikube image load $IMAGE_NAME:$IMAGE_TAG' }
+      steps {
+        sh 'minikube image load $IMAGE_NAME:$IMAGE_TAG'
+      }
     }
 
     stage('Deploy - All Targets') {
       parallel {
+
         stage('Kubernetes') {
           steps {
-           sh 'kubectl set image deployment/horizon-hotel-management-system react-app=$IMAGE_NAME:$IMAGE_TAG'
+            sh '''
+              kubectl set image deployment/horizon-hotel-management-system \
+                react-app=$IMAGE_NAME:$IMAGE_TAG
+
+              kubectl rollout status deployment/horizon-hotel-management-system
+            '''
           }
         }
+
         stage('Firebase Hosting') {
           steps {
             dir('app') {
-              withCredentials([string(credentialsId: 'firebase-token', variable: 'TOKEN-FIREBASES')]) {
+              withCredentials([
+                string(
+                  credentialsId: 'firebase-token',
+                  variable: 'TOKEN-FIREBASES'
+                )
+              ]) {
                 sh 'firebase deploy --only hosting --token "$TOKEN-FIREBASES"'
               }
             }
           }
         }
+
         stage('Vercel') {
           steps {
             dir('app') {
-              withCredentials([string(credentialsId: 'vercel-token', variable: 'VERCEL-TOKEN')]) {
+              withCredentials([
+                string(
+                  credentialsId: 'vercel-token',
+                  variable: 'VERCEL-TOKEN'
+                )
+              ]) {
                 sh 'vercel --token "$VERCEL-TOKEN" --prod --yes'
               }
             }
@@ -93,8 +114,16 @@ pipeline {
   }
 
   post {
-    success { echo "Build ${IMAGE_TAG} deployed successfully." }
-    failure { echo "Pipeline failed — check the stage logs above." }
-    always  { cleanWs() }
+    success {
+      echo "Build ${IMAGE_TAG} deployed successfully."
+    }
+
+    failure {
+      echo "Pipeline failed — check the stage logs above."
+    }
+
+    always {
+      cleanWs()
+    }
   }
 }
