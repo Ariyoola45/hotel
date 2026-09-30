@@ -86,10 +86,10 @@ pipeline {
               withCredentials([
                 string(
                   credentialsId: 'TOKEN-FIREBASES',
-                  variable: 'TOKEN-FIREBASES'
+                  variable: 'FIREBASE_TOKEN'
                 )
               ]) {
-                sh 'firebase deploy --only hosting --token "$TOKEN-FIREBASES"'
+                sh 'firebase deploy --only hosting --token "$FIREBASE_TOKEN"'
               }
             }
           }
@@ -101,10 +101,10 @@ pipeline {
               withCredentials([
                 string(
                   credentialsId: 'VERCEL-TOKEN',
-                  variable: 'VERCEL-TOKEN'
+                  variable: 'VERCEL_TOKEN'
                 )
               ]) {
-                sh 'vercel --token "$VERCEL-TOKEN" --prod --yes'
+                sh 'vercel --token "$VERCEL_TOKEN" --prod --yes'
               }
             }
           }
