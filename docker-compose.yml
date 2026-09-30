@@ -7,7 +7,7 @@ version: "3.9"
 #
 # Usage:
 #   docker compose up -d --build
-#   App:        http://localhost:8080
+#   App:        http://localhost:3045
 #   Prometheus: http://localhost:9090
 #   Alertmanager: http://localhost:9093
 #   Grafana:    http://localhost:3000  (default admin/admin — change on first login)
@@ -29,7 +29,7 @@ services:
     container_name: hh-app
     restart: unless-stopped
     ports:
-      - "8080:80"
+      - "3045:80"
     networks:
       - hh-net
     healthcheck:
