@@ -85,7 +85,7 @@ pipeline {
             dir('app') {
               withCredentials([
                 string(
-                  credentialsId: 'firebase-token',
+                  credentialsId: 'TOKEN-FIREBASES',
                   variable: 'TOKEN-FIREBASES'
                 )
               ]) {
@@ -100,7 +100,7 @@ pipeline {
             dir('app') {
               withCredentials([
                 string(
-                  credentialsId: 'vercel-token',
+                  credentialsId: 'VERCEL-TOKEN',
                   variable: 'VERCEL-TOKEN'
                 )
               ]) {
