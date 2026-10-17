@@ -5,7 +5,7 @@
 !.env.*.example
 app/.env
 app/.env.local
-.env.example
+
 # Dependencies
 node_modules/
 app/node_modules/
@@ -43,7 +43,7 @@ override.tf.json
 
 # Keep Terraform dependency lock files tracked
 !**/.terraform.lock.hcl
-.terraform.lock.hcl
+
 # Deployment tooling
 .vercel/
 .firebase/
