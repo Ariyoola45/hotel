@@ -5,7 +5,7 @@
 !.env.*.example
 app/.env
 app/.env.local
-
+.env.example
 # Dependencies
 node_modules/
 app/node_modules/
