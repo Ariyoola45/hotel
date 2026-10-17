@@ -43,7 +43,7 @@ override.tf.json
 
 # Keep Terraform dependency lock files tracked
 !**/.terraform.lock.hcl
-
+.terraform.lock.hcl
 # Deployment tooling
 .vercel/
 .firebase/
